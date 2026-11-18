@@ -1,0 +1,624 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>石碇高中圖書館｜閱讀冒險</title><style>
+
+*{box-sizing:border-box}body{margin:0;background:#f5f2eb;color:#252d29;font-family:system-ui,"Microsoft JhengHei",sans-serif}main{width:min(680px,100%);margin:auto;padding:24px clamp(10px,4vw,28px)}h1{font-size:clamp(19px,4vw,26px);margin:0 0 14px}svg{display:block;width:100%;height:auto;background:#fffdf7;border-radius:8px;box-shadow:0 2px 15px #26332119}rect,path,ellipse,circle{stroke:#465247;stroke-width:1;fill:#f3ead9}text{fill:#222c26;font-size:17px;text-anchor:middle;dominant-baseline:middle}.detail rect{fill:#e6e8e0}.detail text{font-size:10px}.seat rect,circle{fill:#ebe9e2}.community rect,ellipse{fill:#e8eddf}.door rect{fill:#cdddc9}.platform rect{fill:#fbf4e9}.platform text{font-size:18px}.s-shelf{fill:none;stroke:#af7d4a;stroke-width:23;stroke-linecap:round}.s-trim{fill:none;stroke:#edcf9f;stroke-width:17;stroke-linecap:round}.counter{fill:#e9d1ad}
+.low rect{fill:#dfc5a4}.tree-base{fill:#efe1c6}.canopy{fill:#a7bb94;stroke:#5d7755}.branch{fill:none;stroke:#84684d;stroke-width:2;stroke-linecap:round}.tree-caption,.low-caption{font-size:12px}
+
+body{background:#f1eee3}main{width:min(1320px,100%);padding:22px clamp(10px,3vw,36px)}header,nav,.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}header{justify-content:space-between;margin-bottom:12px}h1{margin:0}small{color:#55664e;font-weight:700}button{font:inherit;color:#344133;background:#fffaf0;border:1px solid #c6c7af;border-radius:9px;padding:8px 12px;cursor:pointer}button[aria-pressed=true]{background:#52664b;color:white}button:focus-visible,canvas:focus-visible{outline:3px solid #9b663e;outline-offset:-3px}button[disabled]{opacity:.45}.scene{position:relative;overflow:hidden;border-radius:15px;background:#252b35;border:4px solid #fffaf0}canvas{display:block;width:100%;height:clamp(460px,72vh,840px);touch-action:none}.hud,.dialog{position:absolute;z-index:1;padding:9px 13px;background:#fffaf0f4;border:1px solid #c8c4ae;border-radius:10px}.hud{top:10px;left:10px;pointer-events:none}.dialog{bottom:12px;left:50%;transform:translateX(-50%);width:min(430px,90%)}.dialog p{margin:7px 0}.controls{margin-top:10px;justify-content:space-between}.controls div{display:flex;gap:5px;flex-wrap:wrap}.controls button{touch-action:none}#plan{max-width:590px;margin:auto}#plan svg{width:100%}[hidden]{display:none!important}@media(max-width:640px){canvas{height:58vh;min-height:360px}.controls small{font-size:12px}}
+#services{max-width:360px}#services .choices{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}#services button{padding:5px 10px}
+#student{width:min(460px,92vw);background:#fffaf0;color:#334135;border:1px solid #b9bba8;border-radius:14px;padding:22px}#student::backdrop{background:#29312e70}#student label{display:inline-block;margin:5px 0}#student input:not([type=radio]){font:inherit;max-width:210px;padding:5px}#student fieldset{margin-top:9px;border:1px solid #c6c7af}
+#student{width:min(620px,94vw);max-height:90vh;overflow:auto}.looks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.look{position:relative;display:grid!important;justify-items:center;gap:3px;text-align:center;padding:6px 2px;border:1px solid #c6c7af;border-radius:8px;background:#f4eedf;font-size:13px;cursor:pointer}.look:has(input:checked){background:#deead5;outline:2px solid #587450;outline-offset:-2px}.look input{position:absolute;top:4px;left:4px}.look canvas{width:63px;height:62px;min-height:0;image-rendering:pixelated;pointer-events:none}.look:focus-within{outline:2px solid #587450}@media(max-width:490px){.looks{grid-template-columns:repeat(2,minmax(0,1fr));}}
+#reading{width:min(680px,94vw);max-height:88vh;overflow:auto;border:1px solid #babda6;border-radius:14px;background:#fffaf0;color:#344133;padding:20px}#reading::backdrop{background:#29312e70}#reading progress{width:100%;accent-color:#688259}#reading table{border-collapse:collapse;width:100%}#reading th,#reading td{padding:5px;text-align:left;border-bottom:1px solid #ddd9c9}#reading select{font:inherit;margin:5px}#reading ol{max-height:160px;overflow:auto}
+</style></head><body><main><header><div><small>石碇高中圖書館</small><h1>閱讀冒險</h1></div></header>
+<section id="game"><div class="scene"><canvas id="canvas" tabindex="0" aria-label="3D 圖書館，方向鍵或 WASD 移動，E 互動"></canvas><div class="hud" id="location">大門</div><section id="services" class="dialog" aria-label="館員阿姨服務" hidden><strong>館員阿姨｜需要什麼幫忙？</strong><div class="choices"><button data-help="borrow">我要借書</button><button data-help="return">我要還書</button><button data-help="find">我想找書</button></div><p id="serviceMessage" aria-live="polite"></p></section><div class="dialog" id="dialog" hidden><strong id="subject"></strong><p id="message"></p><button id="close">繼續探索</button></div></div><div class="controls"><small>方向鍵／WASD 移動 · E 互動 · 鳥瞰可拖曳和縮放；第三人稱：W／S 前後走，A／D 轉向</small><div><button data-move="left" aria-label="左移">←</button><button data-move="up" aria-label="上移">↑</button><button data-move="down" aria-label="下移">↓</button><button data-move="right" aria-label="右移">→</button><button id="action" disabled>互動</button><button id="zoomIn" aria-label="放大">＋</button><button id="zoomOut" aria-label="縮小">－</button><button id="readingOpen" hidden>我的閱讀成果</button><button id="profile">建立我的角色</button><button id="follow" aria-pressed="false">第三人稱</button><button id="camera" title="切換較低的斜視角">低角度</button><button id="home">回到大門</button></div></div></section>
+<section id="plan" hidden><svg viewBox="-10 -8 569 809" role="img" aria-labelledby="title description">
+<title id="title">石碇高中圖書館平面配置圖</title>
+<desc id="description">大門位於左側下半部，新書區和套書區各有一棵大樹，主題架 A、B、C 都是矮櫃，櫃檯在兩區下方。漫畫、繪本及 S 形書架位於中央，右側是分類書架和三張桌子。</desc>
+<g class="shelf"><rect x="1" y="13" width="33" height="153"/><text x="17.5" y="69.5"><tspan x="17.5" dy="0">900</tspan><tspan x="17.5" dy="20">大</tspan><tspan x="17.5" dy="20">本</tspan></text></g>
+<g class="detail"><rect x="42" y="13" width="119" height="13"/><text x="101.5" y="19.5"><tspan x="101.5" dy="0">窗</tspan></text></g>
+<g class="low"><rect x="42" y="35" width="119" height="36"/><text x="101.5" y="46"><tspan x="101.5" dy="0">主題架區 C</tspan></text><text class="low-caption" x="101.5" y="62">矮櫃</text></g>
+<g class="community"><rect x="162" y="12" width="212" height="59"/><text x="268" y="41.5"><tspan x="268" dy="0">社區閱讀站</tspan></text></g>
+<g class="detail"><rect x="160" y="75" width="214" height="15"/><text x="267" y="82.5"><tspan x="267" dy="0">白板</tspan></text></g>
+<g class="low"><rect x="160" y="94" width="214" height="36"/><text x="267" y="105"><tspan x="267" dy="0">主題架區 B</tspan></text><text class="low-caption" x="267" y="121">矮櫃</text></g>
+<g class="shelf"><rect x="384" y="32" width="62" height="37"/><text x="415" y="50.5"><tspan x="415" dy="0">500</tspan></text></g>
+<g class="seat"><rect x="35" y="91" width="23" height="75"/><text x="46.5" y="118.5"><tspan x="46.5" dy="0">沙</tspan><tspan x="46.5" dy="20">發</tspan></text></g>
+<g class="seat"><rect x="1" y="192" width="33" height="230"/><text x="17.5" y="287"><tspan x="17.5" dy="0">電</tspan><tspan x="17.5" dy="20">腦</tspan><tspan x="17.5" dy="20">區</tspan></text></g>
+<g class="low"><rect x="64" y="151" width="38" height="270"/><text x="83" y="246"><tspan x="83" dy="0">主</tspan><tspan x="83" dy="20">題</tspan><tspan x="83" dy="20">架</tspan><tspan x="83" dy="20">區</tspan><tspan x="83" dy="20">A</tspan></text><text class="low-caption" x="83" y="350">矮櫃</text></g>
+<g class="platform"><rect x="160" y="147" width="214" height="270"/><text x="267" y="400"><tspan x="267" dy="0">漫畫、繪本</tspan></text></g>
+<g class="shelf"><rect x="385" y="91" width="27" height="150"/><text x="398.5" y="146"><tspan x="398.5" dy="0">000</tspan><tspan x="398.5" dy="20">│</tspan><tspan x="398.5" dy="20">300</tspan></text></g>
+<g class="shelf"><rect x="521" y="91" width="26" height="159"/><text x="534" y="170.5"><tspan x="534" dy="0">500</tspan></text></g>
+<g class="shelf"><rect x="385" y="268" width="27" height="139"/><text x="398.5" y="317.5"><tspan x="398.5" dy="0">300</tspan><tspan x="398.5" dy="20">│</tspan><tspan x="398.5" dy="20">500</tspan></text></g>
+<g class="shelf"><rect x="521" y="268" width="26" height="149"/><text x="534" y="322.5"><tspan x="534" dy="0">600</tspan><tspan x="534" dy="20">│</tspan><tspan x="534" dy="20">800</tspan></text></g>
+<g class="seat"><rect x="453" y="91" width="29" height="72"/><text x="467.5" y="117"><tspan x="467.5" dy="0">桌</tspan><tspan x="467.5" dy="20">子</tspan></text></g>
+<g class="seat"><rect x="453" y="212" width="29" height="71"/><text x="467.5" y="237.5"><tspan x="467.5" dy="0">桌</tspan><tspan x="467.5" dy="20">子</tspan></text></g>
+<g class="seat"><rect x="453" y="339" width="29" height="67"/><text x="467.5" y="362.5"><tspan x="467.5" dy="0">桌</tspan><tspan x="467.5" dy="20">子</tspan></text></g>
+<g class="shelf"><rect x="456" y="452" width="91" height="25"/><text x="501.5" y="464.5"><tspan x="501.5" dy="0">語言叢書</tspan></text></g>
+
+<g class="shelf"><rect x="512" y="486" width="33" height="185"/><text x="528.5" y="578.5"><tspan x="528.5" dy="0">800</tspan></text></g>
+<g class="door"><rect x="1" y="550" width="33" height="149"/><text x="17.5" y="614.5"><tspan x="17.5" dy="0">大</tspan><tspan x="17.5" dy="20">門</tspan></text></g>
+<g class="shelf"><rect x="298" y="687" width="51" height="37"/><text x="323.5" y="705.5"><tspan x="323.5" dy="0">DVD</tspan></text></g>
+<g class="shelf"><rect x="353" y="687" width="100" height="37"/><text x="403" y="705.5"><tspan x="403" dy="0">雜誌</tspan></text></g>
+<g class="shelf"><rect x="381" y="742" width="164" height="37"/><text x="463" y="760.5"><tspan x="463" dy="0">900</tspan></text></g>
+<path class="s-shelf" d="M 305 219 C 279 201 230 211 228 245 C 226 274 258 282 283 296 C 324 319 307 356 268 359 C 249 361 232 355 221 348"/>
+<path class="s-trim" d="M 305 219 C 279 201 230 211 228 245 C 226 274 258 282 283 296 C 324 319 307 356 268 359 C 249 361 232 355 221 348"/>
+<g transform="translate(155.5 527.5)"><ellipse class="tree-base" rx="50.5" ry="53"/><path class="canopy" d="M -23 -8 Q -35 -18 -22 -27 Q -21 -39 -8 -36 Q 2 -45 12 -35 Q 27 -38 30 -23 Q 38 -14 23 -7 Q 17 2 4 -3 Q -8 4 -23 -8 Z"/><path class="branch" d="M 0 3 V -25 M 0 -14 L -13 -24 M 0 -15 L 13 -26"/><text y="17">新書區</text><text class="tree-caption" y="35">大樹</text></g>
+<g transform="translate(357 529.5)"><ellipse class="tree-base" rx="50" ry="53"/><path class="canopy" d="M -23 -8 Q -35 -18 -22 -27 Q -21 -39 -8 -36 Q 2 -45 12 -35 Q 27 -38 30 -23 Q 38 -14 23 -7 Q 17 2 4 -3 Q -8 4 -23 -8 Z"/><path class="branch" d="M 0 3 V -25 M 0 -14 L -13 -24 M 0 -15 L 13 -26"/><text y="17">套書區</text><text class="tree-caption" y="35">大樹</text></g>
+<g><path class="counter" d="M 184 678 V 634 A 82.5 45 0 0 1 349 634 V 678 Z"/><text x="266.5" y="639">櫃檯</text></g>
+<circle cx="466" cy="53" r="14"/>
+<circle cx="507" cy="54" r="14"/>
+<circle cx="466" cy="189" r="14"/>
+<circle cx="467" cy="310" r="14"/>
+<circle cx="459" cy="610" r="17"/>
+</svg></section><dialog id="student"><form id="studentForm"><h2>我的角色｜測試模式</h2><p>只適用於測試帳號，請勿輸入真實學號或個資。</p><p>測試帳號 DEMO01／DEMO02，測試密碼 Library-2026</p><label>測試學號 <input id="studentId" required autocomplete="off" placeholder="DEMO01"></label><br><label>測試密碼 <input id="studentPassword" required type="password" autocomplete="off"></label><br><label>角色暱稱 <input id="nickname" maxlength="12" placeholder="首次建立時填寫"></label><fieldset><legend>選擇角色外觀</legend><div id="looks" class="looks"></div></fieldset><p id="profileMessage" role="status"></p><button type="submit">登入／建立角色</button> <button id="logout" type="button" hidden>登出</button> <button id="closeProfile" type="button">關閉</button></form></dialog><dialog id="reading"><header><h2>我的閱讀成果</h2><button id="readingClose">關閉</button></header><small>測試模式 · 借閱與班級資料為示範</small>
+<p id="rankTitle"></p><progress id="rankProgress" value="0" max="30"></progress><p id="rankHint"></p>
+<label>配件 <select id="accessory"></select></label><button id="sampleLoan">模擬借閱一本</button><p id="loanStatus" role="status"></p>
+<h3>個人書櫃</h3><ol id="personalBooks"></ol><h3>閱讀徽章</h3><p id="badges"></p>
+<h3>閱讀排行榜</h3><label>排行依據 <select id="rankSort"><option value="total">總借閱量</option><option value="month">本月新增借閱</option></select></label><table><thead><tr><th>讀者</th><th>總借閱</th><th>本月新增</th></tr></thead><tbody id="rankRows"></tbody></table>
+<h3>班級閱讀村</h3><p id="village"></p></dialog></main><script>
+'use strict';
+const $=id=>document.getElementById(id);
+const canvas=$('canvas'),ctx=canvas.getContext('2d'),plan=$('plan'),dialog=$('dialog');
+const worldWidth=549,worldDepth=793,spawn={x:58,y:626};
+const player={...spawn},keys=new Set(),solids=[],points=[],faces=[],stage=[];
+const palette=['#ab6f55','#d3a55b','#849673','#829a9a','#b38b8c','#e0cda5','#f5e7c8'];
+const wood=['#e4c299','#ba8d62','#a87850'];
+const platform={x:160,y:147,w:214,d:270};
+const defaultYaw=-.42,defaultPitch=.81,owl={x:99,y:650};
+let width,height,lastView,zoom=1,yaw=defaultYaw,pitch=defaultPitch,frameTime=0,near,drag,active=true;
+function item(name,x,y,w,d,blocking=true,description){
+ const object={name,x,y,w,d,blocking,description};solids.push(object);return object;
+}
+function face(out,vertices,color){
+ const center=vertices.reduce((p,v)=>[p[0]+v[0]/vertices.length,p[1]+v[1]/vertices.length,p[2]+v[2]/vertices.length],[0,0,0]);
+ out.push({vertices,color,center});
+}
+function box(out,x,y,z,w,d,h,colors=wood){
+ const a=[x,y,z],b=[x+w,y,z],c=[x+w,y+d,z],e=[x,y+d,z];
+ const top=v=>[v[0],v[1],z+h];
+ face(out,[top(a),top(b),top(c),top(e)],colors[0]);
+ face(out,[a,b,top(b),top(a)],colors[1]);
+ face(out,[e,c,top(c),top(e)],colors[1]);
+ face(out,[b,c,top(c),top(b)],colors[2]||colors[1]);
+ face(out,[a,e,top(e),top(a)],colors[2]||colors[1]);
+}
+function cylinder(x,y,r,z,h,colors){
+ const point=(i,height)=>[x+Math.cos(i*Math.PI/8)*r,y+Math.sin(i*Math.PI/8)*r,height];
+ face(faces,Array.from({length:16},(_,i)=>point(i,z+h)),colors[0]);
+ for(let i=0;i<16;i++)face(faces,[point(i,z),point(i+1,z),point(i+1,z+h),point(i,z+h)],colors[1+i%2]);
+}
+function floorHeight(x,y){
+ const p=platform;
+ if(x>=p.x&&x<=p.x+p.w&&y>=p.y&&y<=p.y+p.d)return 12;
+ return x>=p.x&&x<=p.x+p.w&&y>p.y+p.d&&y<=p.y+p.d+8?6:0;
+}
+function shelf(name,x,y,w,d,low){
+ const height=low?27:63,alongX=w>=d,span=alongX?w:d;
+ item(name,x,y,w,d,true,low?'這裡是主題展示矮櫃。':undefined);
+ const rows=low?2:4,divisions=Math.max(1,Math.ceil(span/48)),bay=span/divisions;
+ const trim=['#efd6b0','#c2a080','#ad8967'];
+ for(let row=0;row<=rows;row++){
+  const z=row*(height-3)/rows;
+  box(faces,x,y,z,w,d,3,trim);
+ }
+ for(let i=0;i<=divisions;i++){
+  const offset=Math.min(span-3,i*bay);
+  box(faces,x+(alongX?offset:0),y+(alongX?0:offset),0,alongX?3:w,alongX?d:3,height,trim);
+ }
+ for(let row=0;row<rows;row++){
+  const z=3+row*(height-3)/rows;
+  for(let i=0;i<divisions;i++){
+   for(let j=0;j<3;j++){
+    const offset=i*bay+4+j*5.3;
+    if(offset+3>(i+1)*bay-3||(row+i)%3===2&&j===2)continue;
+    const color=palette[(i*3+row+j)%palette.length],back=(i+row)%2===0;
+    const across=Math.min(alongX?d:w,12);
+    const bx=alongX?x+offset:back?x+3:x+w-across-3;
+    const by=alongX?(back?y+3:y+d-across-3):y+offset;
+    const bookHeight=Math.min((height-3)/rows-4,7+(i+j*2)%5);
+    box(faces,bx,by,z,alongX?4:across,alongX?across:4,bookHeight,[color,color,color]);
+   }
+  }
+ }
+}
+function readingDesk(name,x,y,w,d){
+ item(name,x,y,w,d);
+ for(const dx of [3,w-7])for(const dy of [3,d-7])box(faces,x+dx,y+dy,0,4,4,23,['#a17a59','#795d46']);
+ box(faces,x,y,23,w,d,5);
+}
+function build(){
+ for(const g of plan.querySelectorAll('svg g[class]')){
+  const rect=g.querySelector('rect'),kind=g.getAttribute('class'),[x,y,w,d]=['x','y','width','height'].map(a=>Number(rect.getAttribute(a)));
+  const name=[...g.querySelectorAll('text:first-of-type tspan')].map(t=>t.textContent).join('').replace('│','–');
+  if(kind==='shelf'||kind==='low'){shelf(name,x,y,w,d,kind==='low');continue;}
+  if(kind==='door'){item('大門',x,y,w,d,false);box(faces,x,y,0,w,d,1,['#748567','#657559']);continue;}
+  if(kind==='platform')continue;
+  if(kind==='seat'&&name==='桌子'){readingDesk('閱覽桌',x,y,w,d);continue;}
+  if(kind==='seat'&&name==='電腦區'){
+   readingDesk(name,x,y,w,d);
+   for(let dy=15;dy<d-12;dy+=35){
+    box(faces,x+9,y+dy,28,7,15,16,['#68716b','#404849']);
+    box(faces,x+20,y+dy,28,8,13,2,['#d1c7ae','#9b9686']);
+   }
+   continue;
+  }
+  item(name,x,y,w,d);
+  const colors=kind==='community'?['#d5ddbd','#a5ae8c']:kind==='detail'?['#f0eee0','#c0b8a4']:['#c1c4a4','#969779'];
+  const h=name==='窗'?2:name==='白板'?30:26;
+  box(faces,x,y,0,w,d,h,colors);
+ }
+ box(stage,platform.x,platform.y,0,platform.w,platform.d+8,6,['#d2a878','#9c714e']);
+ box(stage,platform.x,platform.y,6,platform.w,platform.d,6,['#dcb78a','#ac815b']);
+ const curve=plan.querySelector('.s-shelf'),length=curve.getTotalLength();
+ for(let i=0;i<=length;i+=9){
+  const p=curve.getPointAtLength(i);
+  item('漫畫、繪本',p.x-10,p.y-10,20,20,true,'中央兩階平台上的 S 形矮書架。');
+  box(faces,p.x-10,p.y-10,12,20,20,20,['#ecd1a7','#bc946a','#a47c56']);
+ }
+ for(const tree of plan.querySelectorAll('.tree-base')){
+  const group=tree.parentElement,[x,y]=group.getAttribute('transform').match(/[\d.]+/g).map(Number),name=group.querySelector('text').textContent;
+  item(name,x-48,y-48,96,96,true,'這一區以大樹為地標，底部是環形書架。').radius=48;
+  cylinder(x,y,48,0,15,['#edcfaa','#b79871','#c8aa80']);
+  cylinder(x,y,34,15,36,['#ecd1ad','#a17d5d','#bb9571']);
+  for(let i=0;i<16;i++){
+   const a=i*Math.PI/8,bx=x+Math.cos(a)*34,by=y+Math.sin(a)*34,c=palette[i%palette.length];
+   box(faces,bx-2,by-2,22,5,5,15,[c,c,c]);
+  }
+  box(faces,x-11,y-11,51,22,22,65,['#aa805d','#906448','#79513a']);
+  for(const [dx,dy] of [[-28,-12],[20,-19],[-19,22],[24,20],[0,0]]){
+   box(faces,x+dx-14,y+dy-13,96+(dx===0?18:0),30,29,25,['#aabd8c','#7f996c','#6d895d']);
+  }
+  points.push({x,y,z:149,name});
+ }
+ const greeting='你好，我是館員阿姨。要借書或找書，可以來櫃檯問我。還書時，可以使用櫃檯旁的還書箱。';
+ for(let x=184;x<349;x+=11){
+  const curveY=634-45*Math.sqrt(Math.max(0,1-((x+5.5-266.5)/82.5)**2));
+  const depth=x===184||x===338?653-curveY:14;
+  item('館員阿姨',x,curveY,11,depth,true,greeting);
+  box(faces,x,curveY,0,11,depth,29,['#e8c8a0','#bc9066','#a67a57']);
+  box(faces,x,curveY-1,29,11,depth+2,3,['#efd5b5','#c7a382','#b68c66']);
+ }
+ item('館員阿姨',257,625,18,18,true,greeting);
+ item('還書箱',149,601,23,19,true,'把要歸還的書投入還書箱。');
+ box(faces,149,601,0,23,19,24,['#e8cfac','#b7854e','#9f6c3e']);
+ box(faces,154,608,24,13,4,1,['#66513a','#66513a']);
+ for(const chair of plan.querySelectorAll('svg > circle')){
+  const x=+chair.getAttribute('cx'),y=+chair.getAttribute('cy'),r=+chair.getAttribute('r');
+  item('圓座',x-r,y-r,r*2,r*2).radius=r;cylinder(x,y,r,0,13,['#e4dfcb','#b6ad95','#c5bca3']);
+ }
+ points.push({x:17,y:624,z:6,name:'大門'},{x:267,y:280,z:42,name:'漫畫、繪本'},{x:266,y:634,z:66,name:'館員阿姨'});
+}
+function blocked(x,y){
+ const margin=5;
+ if(x<9||x>worldWidth-9||y<9||y>worldDepth-9)return true;
+ return solids.some(o=>{
+  if(!o.blocking)return false;
+  if(o.radius)return Math.hypot(x-o.x-o.radius,y-o.y-o.radius)<o.radius+margin;
+  const dx=Math.max(o.x-x,0,x-o.x-o.w),dy=Math.max(o.y-y,0,y-o.y-o.d);
+  return dx*dx+dy*dy<margin*margin;
+ });
+}
+const route=[];let waypoint=0;
+function nearest(){
+ let best,distance=25;
+ for(const o of solids){
+  const dx=Math.max(o.x-player.x,0,player.x-o.x-o.w),dy=Math.max(o.y-player.y,0,player.y-o.y-o.d);
+  const d=Math.hypot(dx,dy);if(d<distance){best=o;distance=d;}
+ }
+ return best;
+}
+function librarian(out){
+ const x=266,y=634;
+ const apron=['#af8290','#966978','#825865'],hair=['#685245','#49392f','#3e2d25'];
+ const skin=['#efd0a9','#d4aa83','#bc906d'];
+ box(out,x-8,y-6,0,16,12,18,['#5e5d54','#48463e']);
+ box(out,x-11,y-7,15,22,14,22,apron);
+ box(out,x-3,y-8,27,6,2,4,['#f3deaf','#e1c990']);
+ box(out,x-9,y-8,35,18,16,17,skin);
+ box(out,x-10,y-7,50,20,16,5,hair);
+ box(out,x-10,y+5,39,20,4,13,hair);
+ box(out,x-5,y+7,46,10,7,7,['#7e6b5c','#59473d','#4c3b30']);
+ for(const dx of [-10,8])box(out,x+dx,y-5,39,2,2,3,['#efcb8c','#cda56d']);
+ for(const dx of [-6,2]){
+  box(out,x+dx,y-9,43,4,1,3,['#685243','#685243']);
+  box(out,x+dx,y-9,44,3,1,1,['#f7ecce','#f7ecce']);
+ }
+ box(out,x-2,y-10,39,4,2,1,['#a66e59','#a66e59']);
+}
+function mascot(out){
+ const {x,y}=owl;
+ const bronze=['#eac799','#be8751','#a96339'],brown=['#b67b52','#93613f','#75472f'],cream=['#fff0ca','#e5c993','#ceac79'];
+ box(out,x-17,y-13,0,34,26,3,['#d9b477','#a37b45','#956b3b']);
+ box(out,x-13,y-10,3,26,20,30,brown);
+ for(const sign of [-1,1]){
+  box(out,x+sign*10-4,y-5,10,8,13,16,bronze);
+  box(out,x+sign*7-4,y+2,3,8,10,5,bronze);
+ }
+ box(out,x-10,y+7,10,20,5,15,['#b5c994','#91a97c','#758e66']);
+ box(out,x-3,y+11,14,6,2,5,['#f3d59a','#e7c97e']);
+ box(out,x-16,y-12,29,32,24,24,brown);
+ for(const sign of [-1,1]){
+  const px=x+sign*7;
+  box(out,px-6,y+10,35,12,4,13,cream);
+  box(out,px-3,y+13,39,6,2,7,['#4a3b2a','#34271c']);
+  box(out,px-1,y+14.9,43,2,1,2,['#fff5d3','#fff5d3']);
+  box(out,x+sign*12-4,y-9,51,8,11,7,brown);
+ }
+ box(out,x-3,y+13,34,6,4,6,['#edb957','#c68633']);
+}
+const entranceYaw=-Math.PI/2,walkPitch=.42;
+let follow=false,profile=null,profileId=null,heading=entranceYaw,stride=0,movingPlayer=false;
+const levels=[
+ {at:0,name:'新手讀者',size:1,gear:'無配件'},
+ {at:5,name:'閱讀學徒',size:1.04,gear:'探索背包'},
+ {at:15,name:'知識探險家',size:1.08,gear:'探險帽'},
+ {at:30,name:'圖書大師',size:1.12,gear:'迷你貓頭鷹'}
+];
+const shelfSamples=[
+ ['山谷裡的郵局','故事'],['會說話的潮間帶','自然'],['墨水偵探社','推理'],['沿著河流找家','地理'],['樹冠上的筆記','自然'],['失蹤的借書卡','推理']
+];
+function monthKey(offset=0){
+ const now=new Date(),month=new Date(now.getFullYear(),now.getMonth()+offset,1);
+ return month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');
+}
+function libraryRecord(id){
+ const data=JSON.parse(localStorage.getItem('shiding-reading-demo-'+id)||'{}');
+ const seed=id==='DEMO01'?0:15,books=[];
+ for(let i=0;i<seed;i++){
+  const [title,category]=shelfSamples[i%shelfSamples.length];
+  books.push({title:title+' · 第 '+(Math.floor(i/shelfSamples.length)+1)+' 冊',category,month:monthKey(i<4?0:i<9?-1:-2)});
+ }
+ return {books:[...books,...(data.loans??[])],loans:data.loans??[],gear:data.gear??0};
+}
+let readingData=null;
+function growth(total){return levels.reduce((current,l)=>total>=l.at?l:current,levels[0]);}
+function saveReading(){
+ localStorage.setItem('shiding-reading-demo-'+profileId,JSON.stringify({loans:readingData.loans,gear:readingData.gear}));
+}
+function rowText(parent,tag,value){const node=document.createElement(tag);node.textContent=value;parent.append(node);return node;}
+function showReading(){
+ const {books,gear}=readingData,total=books.length,current=growth(total),next=levels.find(l=>l.at>total);
+ $('rankTitle').textContent=profile.name+' · '+current.name+' · 累積 '+total+' 本';
+ $('rankProgress').max=next?.at??30;$('rankProgress').value=Math.min(total,$('rankProgress').max);
+ $('rankHint').textContent=next?'再借 '+(next.at-total)+' 本可達「'+next.name+'」。':'已到最高等級，體型上限為初始的 112%。';
+ const select=$('accessory');select.replaceChildren();
+ levels.forEach((l,i)=>{const option=rowText(select,'option',l.gear+(l.at>total?' · '+l.at+' 本解鎖':''));option.value=i;option.disabled=l.at>total;});
+ select.value=String(gear);
+ const list=$('personalBooks');list.replaceChildren();
+ if(!books.length)rowText(list,'li','書櫃目前是空的，可先試用「模擬借閱一本」。');
+ for(const book of books.slice().reverse())rowText(list,'li',book.title+' ／ '+book.category+' ／ '+book.month);
+ const months=new Set(books.map(b=>b.month)),categoryCount=new Set(books.map(b=>b.category)).size;
+ const badges=[];
+ if([0,-1,-2].every(offset=>months.has(monthKey(offset))))badges.push('連續三月借閱');
+ if(categoryCount>=3)badges.push('跨領域閱讀');
+ $('badges').textContent=badges.join('、')||'累積三種閱讀類別或連續三個月借閱可解鎖。';
+ const metric=$('rankSort').value;
+ const scores=[['小島讀者',33,3],['木木',19,9],['鯨魚同學',7,5],[profile.name,total,books.filter(b=>b.month===monthKey()).length]];
+ scores.sort((a,b)=>b[metric==='month'?2:1]-a[metric==='month'?2:1]||b[metric==='month'?1:2]-a[metric==='month'?1:2]);
+ const rows=$('rankRows');rows.replaceChildren();
+ scores.forEach(score=>{const tr=document.createElement('tr');score.forEach(value=>rowText(tr,'td',value));rows.append(tr);});
+ $('village').textContent='示範班級 101 · '+[profile.name,'木木','鯨魚同學'].join('、')+' · 全村累積 '+(total+26)+' 本';
+}
+const looks=[
+ {id:'sage',name:'森林背包',hair:'#47372d',skin:'#e9b992',shirt:'#8ea377',shade:'#596e4d',cut:'crop',extra:'pack'},
+ {id:'plum',name:'梅紫短髮',hair:'#3a2938',skin:'#f2c9a7',shirt:'#bb8dab',shade:'#825a78',cut:'bob',extra:'pin'},
+ {id:'sun',name:'蜂蜜捲髮',hair:'#805333',skin:'#d09973',shirt:'#e5b35e',shade:'#a9773d',cut:'curl',extra:'pack'},
+ {id:'ocean',name:'海藍高馬尾',hair:'#332827',skin:'#bd8261',shirt:'#79a8b3',shade:'#437584',cut:'pony',extra:'pin'},
+ {id:'rose',name:'玫瑰雙髮髻',hair:'#563535',skin:'#eab696',shirt:'#cf8f89',shade:'#925d61',cut:'buns',extra:'pin'},
+ {id:'moss',name:'苔綠圓眼鏡',hair:'#292b33',skin:'#a76c50',shirt:'#adb477',shade:'#6e7547',cut:'crop',extra:'glasses'},
+ {id:'cloud',name:'雲灰側分',hair:'#655957',skin:'#dbaa83',shirt:'#a6afc3',shade:'#666f91',cut:'side',extra:'pack'},
+ {id:'berry',name:'莓紅長髮',hair:'#5a3443',skin:'#f1caab',shirt:'#b96977',shade:'#803e57',cut:'long',extra:'glasses'}
+,
+{"id":"fern","name":"蕨葉小旅人","hair":"#382c27","skin":"#c98b68","shirt":"#8caf8b","shade":"#55775c","cut":"buns","extra":"pack","width":0.92,"height":0.83},
+{"id":"peach","name":"蜜桃畫家","hair":"#744c39","skin":"#efbd99","shirt":"#e4a18b","shade":"#a66a59","cut":"bob","extra":"pin","width":1.23,"height":0.9},
+{"id":"iris","name":"鳶尾觀察家","hair":"#372b3c","skin":"#ab7153","shirt":"#a295c7","shade":"#6b5e93","cut":"long","extra":"glasses","width":0.84,"height":1.17},
+{"id":"cedar","name":"雪松採集家","hair":"#503426","skin":"#dba981","shirt":"#ad794e","shade":"#745133","cut":"side","extra":"pack","width":1.15,"height":1.14},
+{"id":"mint","name":"薄荷小館員","hair":"#2d3027","skin":"#e7b192","shirt":"#88c3ab","shade":"#4f8576","cut":"crop","extra":"glasses","width":1.08,"height":0.83},
+{"id":"amber","name":"琥珀星探員","hair":"#825634","skin":"#b88261","shirt":"#e0b86f","shade":"#a98044","cut":"curl","extra":"pin","width":0.86,"height":1.11},
+{"id":"ink","name":"墨藍觀星者","hair":"#2a2933","skin":"#d49c79","shirt":"#7c8ab9","shade":"#526087","cut":"pony","extra":"glasses","width":0.91,"height":1.18},
+{"id":"cocoa","name":"可可散步家","hair":"#5c392d","skin":"#9e684c","shirt":"#bf9879","shade":"#876045","cut":"curl","extra":"pack","width":1.23,"height":0.91},
+{"id":"lotus","name":"藕粉寫信人","hair":"#4c3038","skin":"#efc0a0","shirt":"#cf9ead","shade":"#946172","cut":"long","extra":"pin","width":1.08,"height":1.13},
+{"id":"lemon","name":"檸檬手帳家","hair":"#7a603d","skin":"#e4a77f","shirt":"#d7cf83","shade":"#8e854d","cut":"buns","extra":"glasses","width":0.88,"height":0.86},
+{"id":"rain","name":"雨藍收藏家","hair":"#494751","skin":"#c18765","shirt":"#88a4bb","shade":"#5c768e","cut":"bob","extra":"pack","width":1.2,"height":1.08},
+{"id":"poppy","name":"朱槿郵差","hair":"#583227","skin":"#ad7358","shirt":"#cf795e","shade":"#924738","cut":"side","extra":"pin","width":0.89,"height":1.03}
+];
+function avatar(out,x,y,look){
+ const z=floorHeight(x,y);
+ const skin=[look.skin,look.skin,look.skin],hair=[look.hair,look.hair,look.hair],shirt=[look.shirt,look.shade,look.shade];
+ box(out,x-8,y-5,z+6,16,10,14,shirt);
+ for(const dx of [-11,8]){
+  box(out,x+dx,y-4,z+10,3,8,7,shirt);
+  box(out,x+dx,y-3,z+7,3,6,3,skin);
+ }
+ box(out,x-10,y-7,z+19,20,14,15,skin);
+ box(out,x-8,y-6,z+34,16,12,3,hair);
+ box(out,x-11,y-8,z+31,22,16,4,hair);
+ box(out,x-9,y-8,z+24,18,4,9,hair);
+ const cut=look.cut;
+ if(['bob','long','curl'].includes(cut)){
+  const bottom=cut==='long'?17:23;
+  for(const dx of [-11,8])box(out,x+dx,y-6,z+bottom,3,12,10+(23-bottom),hair);
+ }
+ if(cut==='pony')box(out,x+3,y-11,z+20,7,6,13,hair);
+ if(cut==='buns')for(const dx of [-14,8])box(out,x+dx,y-5,z+33,6,8,6,hair);
+ if(cut==='curl')for(const dx of [-8,-1,6])box(out,x+dx,y-4,z+35,5,8,3,hair);
+ if(cut==='side')box(out,x-10,y+6,z+29,10,2,4,hair);
+ for(const dx of [-5,3]){
+  box(out,x+dx,y+7,z+26,2,1,3,['#463534','#463534']);
+  box(out,x+dx+(dx<0?-2:1),y+7,z+23,3,1,1,['#d89987','#cb836f']);
+ }
+ box(out,x-1,y+7,z+22,2,1,1,['#9c665a','#9c665a']);
+ if(look.extra==='pin')box(out,x+7,y+7,z+31,3,2,2,['#f2ce78','#edb766']);
+ if(look.extra==='pack')box(out,x-5,y-8,z+8,10,4,9,['#d9b082','#a37554','#986947']);
+ if(look.extra==='glasses')for(const dx of [-6,2]){
+  box(out,x+dx,y+8,z+29,5,1,1,['#514750','#514750']);
+  box(out,x+dx,y+8,z+25,5,1,1,['#514750','#514750']);
+ }
+}
+function shapeAvatar(model,x,y,z,look){
+ const width=look.width??1,height=look.height??1;
+ if(width===1&&height===1)return;
+ for(const part of model){
+  part.vertices=part.vertices.map(([px,py,pz])=>[x+(px-x)*width,y+(py-y)*width,z+(pz-z)*height]);
+  const [cx,cy,cz]=part.center;
+  part.center=[x+(cx-x)*width,y+(cy-y)*width,z+(cz-z)*height];
+ }
+}
+function buildLookPicker(){
+ for(const look of looks){
+  const label=document.createElement('label');label.className='look';
+  const radio=document.createElement('input');
+  Object.assign(radio,{type:'radio',name:'look',value:look.id,defaultChecked:look.id==='sage'});
+  const preview=document.createElement('canvas');preview.width=48;preview.height=47;preview.setAttribute('aria-hidden','true');
+  const title=document.createElement('span');title.textContent=look.name;
+  label.append(radio,preview,title);$('looks').append(label);
+  const pen=preview.getContext('2d'),model=[];
+  avatar(model,0,0,look);
+  for(const dx of [-6,1])box(model,dx,-3,0,5,7,8,['#627080','#414955']);
+  shapeAvatar(model,0,0,0,look);
+  model.sort((a,b)=>(a.center[1]-b.center[1])*.9+(a.center[2]-b.center[2])*.28+(a.center[0]-b.center[0])*.22);
+  for(const part of model){
+   pen.fillStyle=part.color;pen.beginPath();
+   part.vertices.forEach(([x,y,z],i)=>{
+    const px=Math.round(24+x-y*.23),py=Math.round(44-z*.84+y*.28+x*.14);
+    if(i)pen.lineTo(px,py);else pen.moveTo(px,py);
+   });
+   pen.closePath();pen.fill();
+  }
+ }
+}
+function owlWalk(dt){
+ if(!route.length)return;
+ const next=route[waypoint],dx=next.x-owl.x,dy=next.y-owl.y,d=Math.hypot(dx,dy);
+ if(d<1){waypoint=(waypoint+1)%route.length;return;}
+ const step=Math.min(d,dt*44);
+ owl.x+=dx*step/d;owl.y+=dy*step/d;
+ owl.hit.x=owl.x-14;owl.hit.y=owl.y-12;
+}
+function buildOwlRoute(){
+ const step=12,origin=[Math.round(owl.x/step),Math.round(owl.y/step)];
+ const nodes=[origin],parents=new Map([[origin.join(','),null]]);
+ for(let i=0;i<nodes.length;i++){
+  const [x,y]=nodes[i];
+  for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   const nx=x+dx,ny=y+dy,key=[nx,ny].join(',');
+   if(parents.has(key)||floorHeight(nx*step,ny*step)||blocked(nx*step,ny*step)||blocked((x+dx/2)*step,(y+dy/2)*step))continue;
+   parents.set(key,nodes[i]);nodes.push([nx,ny]);
+  }
+ }
+ for(const [tx,ty] of [[126,590],[250,563],[385,554],[110,455]]){
+  let node=nodes.reduce((best,p)=>Math.hypot(p[0]*step-tx,p[1]*step-ty)<Math.hypot(best[0]*step-tx,best[1]*step-ty)?p:best,origin);
+  const segment=[];
+  while(node){segment.push({x:node[0]*step,y:node[1]*step});node=parents.get(node.join(','));}
+  route.push(...segment.slice().reverse(),...segment.slice(1));
+ }
+}
+const serviceText={
+ borrow:'選好想借的書後，請帶著書和借閱證到櫃檯。',
+ return:'櫃檯旁有木色還書箱。需要協助時，可以問館員阿姨。',
+ find:'可以先依書架分類找書，或把書名、作者告訴館員阿姨。'
+};
+function updateServices(){
+ const show=near?.name==='館員阿姨'&&dialog.hidden;
+ if($('services').hidden===show){
+  $('services').hidden=!show;
+  if(!show)$('serviceMessage').textContent='';
+ }
+}
+function drawWalker(out){
+ const model=[];
+ const look=looks.find(option=>option.id===profile?.look)??looks[0];
+ avatar(model,player.x,player.y,look);
+ const z=floorHeight(player.x,player.y),step=movingPlayer?Math.sin(stride)*3:0;
+ const pants=['#596273','#444b59','#363c48'];
+ box(model,player.x-6,player.y-4+step,z,5,8,8,pants);
+ box(model,player.x+1,player.y-4-step,z,5,8,8,pants);
+ const total=readingData?.books.length??0,scale=growth(total).size,gear=readingData?.gear??0;
+ if(gear===1)box(model,player.x-6,player.y-10,z+8,12,5,11,['#c4a277','#8f7052']);
+ if(gear===2){box(model,player.x-11,player.y-8,z+34,22,16,3,['#c49b63','#8e6844']);box(model,player.x-7,player.y-5,z+37,14,11,5,['#d4b486','#a68157']);}
+ if(gear===3){box(model,player.x+10,player.y+1,z+18,8,7,10,['#c08d65','#8d6245']);box(model,player.x+12,player.y+8,z+23,4,1,2,['#f5dfb7','#f5dfb7']);}
+ shapeAvatar(model,player.x,player.y,z,look);
+ const angle=Math.PI-heading,cs=Math.cos(angle),sn=Math.sin(angle);
+ for(const part of model){
+  const vertices=part.vertices.map(([x,y,z])=>{
+   const dx=x-player.x,dy=y-player.y;
+   return [player.x+(cs*dx-sn*dy)*scale,player.y+(sn*dx+cs*dy)*scale,floorHeight(player.x,player.y)+(z-floorHeight(player.x,player.y))*scale];
+  });
+  face(out,vertices,part.color);
+ }
+}
+function resize(){
+ const rect=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
+ if(!rect.width||!rect.height)return;
+ lastView=undefined;width=rect.width;height=rect.height;canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function render(time){
+ const dt=Math.min(.035,(time-frameTime)/1000);frameTime=time;
+ movingPlayer=false;
+ if(active&&dialog.hidden&&!$('student').open&&!$('reading').open){
+  const dx=Number(keys.has('right'))-Number(keys.has('left')),dy=Number(keys.has('down'))-Number(keys.has('up'));
+  if(follow){
+   heading-=dx*dt*1.55;
+   const delta=Math.atan2(Math.sin(heading-yaw),Math.cos(heading-yaw));
+   yaw+=delta*Math.min(1,dt*8);
+  }
+  const side=follow?0:dx,length=Math.hypot(side,dy)||1,dir=follow?heading:yaw;
+  const cs=Math.cos(dir),sn=Math.sin(dir),oldX=player.x,oldY=player.y;
+  const speed=follow?82:125;
+  const x=player.x+(cs*side+sn*dy)*speed*dt/length,y=player.y+(-sn*side+cs*dy)*speed*dt/length;
+  if(!blocked(x,player.y))player.x=x;if(!blocked(player.x,y))player.y=y;
+  const walked=Math.hypot(player.x-oldX,player.y-oldY);
+  movingPlayer=walked>0;
+  if(movingPlayer){
+   if(!follow)heading=Math.atan2(oldX-player.x,oldY-player.y);
+   stride=(stride+walked*.17)%(Math.PI*2);
+  }
+ }
+ if(active&&dialog.hidden)owlWalk(dt);
+ const view=[player.x,player.y,yaw,pitch,zoom,owl.x,owl.y,follow,movingPlayer,stride,profile?.name,profile?.look,readingData?.books.length,readingData?.gear].join("|");
+ if(active&&width&&view!==lastView){
+  lastView=view;
+  near=nearest();$('action').disabled=!near;updateServices();
+  $('location').textContent=near?.name??(floorHeight(player.x,player.y)?'漫畫、繪本平台':'館內走道');
+  const cs=Math.cos(yaw),sn=Math.sin(yaw),sp=Math.sin(pitch),cp=Math.cos(pitch);
+  const extentX=Math.abs(cs)*549+Math.abs(sn)*793;
+  const extentY=(Math.abs(sn)*549+Math.abs(cs)*793)*sp+180*cp;
+  const scale=(follow?Math.min(width/310,height/285):Math.min(width/(extentX+55),height/(extentY+45)))*zoom;
+  const radius=follow?115:1120;
+  let distance=96;
+  if(follow)for(let d=28;d<96;d+=4){
+   if(solids.some(o=>o.blocking&&player.x+sn*d>o.x-2&&player.x+sn*d<o.x+o.w+2&&player.y+cs*d>o.y-2&&player.y+cs*d<o.y+o.d+2)){distance=Math.max(33,d-9);break;}
+  }
+  const shift=follow?radius*cp-distance:0;
+  const cx=follow?player.x-shift*sn:zoom>1?player.x:274.5,cy=follow?player.y-shift*cs:zoom>1?player.y:396.5;
+  const viewDepth=(x,y,z)=>((x-cx)*sn+(y-cy)*cs)*cp+z*sp;
+  const project=([x,y,z])=>{
+   const across=(x-cx)*cs-(y-cy)*sn,along=(x-cx)*sn+(y-cy)*cs;
+   const perspective=radius/Math.max(follow?20:260,radius-viewDepth(x,y,z));
+   return [width/2+across*scale*perspective,height*(follow?.66:.54)+(along*sp-z*cp)*scale*perspective];
+  };
+  const polygon=(vertices,color)=>{
+   if(follow){
+    const clipped=[];
+    for(let i=0;i<vertices.length;i++){
+     const a=vertices[i],b=vertices[(i+1)%vertices.length],d1=radius-20-viewDepth(...a),d2=radius-20-viewDepth(...b);
+     if(d1>=0)clipped.push(a);
+     if((d1>=0)!==(d2>=0)){const t=d1/(d1-d2);clipped.push(a.map((v,j)=>v+(b[j]-v)*t));}
+    }
+    if(clipped.length<3)return;
+    vertices=clipped;
+   }
+   ctx.fillStyle=color;ctx.beginPath();
+   vertices.forEach((v,i)=>{const p=project(v);if(i)ctx.lineTo(...p);else ctx.moveTo(...p);});
+   ctx.closePath();ctx.fill();
+  };
+  const sky=ctx.createLinearGradient(0,0,0,height);sky.addColorStop(0,'#343b48');sky.addColorStop(1,'#1c222b');ctx.fillStyle=sky;ctx.fillRect(0,0,width,height);
+  for(let y=0;y<worldDepth;y+=11)polygon([[0,y,0],[549,y,0],[549,Math.min(y+11,793),0],[0,Math.min(y+11,793),0]],['#d9b88c','#d4b184','#dcbd95'][Math.floor(y/11)%3]);
+  stage.forEach(f=>polygon(f.vertices,f.color));
+  const moving=[];drawWalker(moving);mascot(moving);librarian(moving);
+  const depth=f=>viewDepth(...f.center);
+  [...faces,...moving].sort((a,b)=>depth(a)-depth(b)).forEach(f=>polygon(f.vertices,f.color));
+  const [mx,my]=project([owl.x,owl.y,76]);
+  ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';
+  if(!follow||viewDepth(owl.x,owl.y,76)<radius-20){
+  ctx.fillStyle='#5a704c';ctx.beginPath();ctx.roundRect(mx-45,my-12,90,24,9);ctx.fill();
+  ctx.fillStyle='#fff8dc';ctx.fillText('迎賓貓頭鷹',mx,my);
+  }
+  ctx.font='600 12px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';
+  const labels=profile?[...points,{x:player.x,y:player.y,z:floorHeight(player.x,player.y)+58,name:profile.name}]:points;
+  for(const p of labels){
+   if(follow&&viewDepth(p.x,p.y,p.z)>=radius-20)continue;
+   const [x,y]=project([p.x,p.y,p.z]);const w=ctx.measureText(p.name).width+14;
+   ctx.fillStyle='#fff7e6';ctx.beginPath();ctx.roundRect(x-w/2,y-10,w,20,6);ctx.fill();ctx.fillStyle='#394334';ctx.fillText(p.name,x,y);
+  }
+ }
+ requestAnimationFrame(render);
+}
+function openInteraction(){
+ if(!near||!active||!dialog.hidden)return;
+ if(near.name==='館員阿姨'){updateServices();$('services').querySelector('button').focus();return;}
+ keys.clear();$('subject').textContent=near.name;$('message').textContent=near.description??'這裡是'+near.name+'。';dialog.hidden=false;updateServices();$('close').focus();
+}
+function close(){dialog.hidden=true;updateServices();canvas.focus();}
+const directions={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right'};
+window.addEventListener('keydown',e=>{
+ if(!active||$('student').open||$('reading').open)return;
+ if(e.key==='Escape'&&!dialog.hidden){close();return;}
+ if(e.key.toLowerCase()==='e'&&!e.repeat)openInteraction();
+ const dir=directions[e.key]??directions[e.key.toLowerCase()];
+ if(dir&&dialog.hidden){e.preventDefault();keys.add(dir);}
+});
+window.addEventListener('keyup',e=>keys.delete(directions[e.key]??directions[e.key.toLowerCase()]));
+window.addEventListener('blur',()=>keys.clear());
+for(const b of document.querySelectorAll('[data-move]')){
+ b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(b.dataset.move);};
+ b.onlostpointercapture=()=>keys.delete(b.dataset.move);
+ b.onclick=e=>{if(e.detail===0){const dir=b.dataset.move;keys.add(dir);setTimeout(()=>keys.delete(dir),130);}};
+}
+canvas.onpointerdown=e=>{canvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY};};
+canvas.onpointermove=e=>{if(drag!==undefined){const turn=(e.clientX-drag.x)*.004;if(follow)heading+=turn;else yaw+=turn;pitch=Math.max(.3,Math.min(1.34,pitch+(e.clientY-drag.y)*.006));drag={x:e.clientX,y:e.clientY};}};
+canvas.onlostpointercapture=()=>{drag=undefined;};
+$('zoomIn').onclick=()=>{zoom=Math.min(2.3,zoom+.24);};$('zoomOut').onclick=()=>{zoom=Math.max(1,zoom-.24);};
+$('home').onclick=()=>{Object.assign(player,spawn);heading=entranceYaw;yaw=follow?heading:defaultYaw;pitch=follow?walkPitch:defaultPitch;zoom=1;keys.clear();close();};
+function setFollow(on){
+ follow=on;yaw=on?heading:defaultYaw;pitch=on?walkPitch:defaultPitch;zoom=1;
+ for(const id of ["camera","zoomIn","zoomOut"])$(id).hidden=on;lastView=undefined;
+ $('follow').setAttribute('aria-pressed',on);$('follow').textContent=on?'全館鳥瞰':'第三人稱';
+}
+$('follow').onclick=()=>setFollow(!follow);
+$('profile').onclick=()=>{
+ keys.clear();$('profileMessage').textContent=profile?'可以換造型，再按「儲存外觀」。':'';
+ $('studentId').value=profileId??'';$('nickname').value=profile?.name??'';
+ for(const radio of $('looks').querySelectorAll('input'))radio.checked=radio.value===(profile?.look??'sage');
+ $('studentPassword').required=!profile;$('studentId').readOnly=!!profile;
+ $('studentForm').querySelector('[type=submit]').textContent=profile?'儲存外觀':'登入／建立角色';
+ $('student').showModal();
+};
+$('closeProfile').onclick=()=>$('student').close();
+$('logout').onclick=()=>{
+ profile=null;profileId=null;readingData=null;$('readingOpen').hidden=true;$('profile').textContent='建立我的角色';$('logout').hidden=true;$('studentForm').reset();$('student').close();
+};
+$('studentForm').onsubmit=e=>{
+ e.preventDefault();
+ const id=$('studentId').value.trim().toUpperCase(),password=$('studentPassword').value;
+ $('studentPassword').value='';
+ const editing=profileId===id&&!!profile;
+ if(!editing&&(!['DEMO01','DEMO02'].includes(id)||password!=='Library-2026')){
+  $('profileMessage').textContent='請使用上方的測試帳號及密碼。';return;
+ }
+ const key='shiding-demo-character-'+id;
+ try{
+  const saved=localStorage.getItem(key);
+  const name=$('nickname').value.trim();
+  if(!saved&&!name){$('profileMessage').textContent='第一次登入請填寫角色暱稱。';return;}
+  const choice=new FormData(e.currentTarget).get('look');
+  const look=looks.find(option=>option.id===choice)?.id??'sage';
+  const next=editing?{name:name||profile.name,look}:saved?JSON.parse(saved):{name,look};
+  if(editing||!saved)localStorage.setItem(key,JSON.stringify(next));
+  readingData=libraryRecord(id);profile=next;profileId=id;
+ }catch{$('profileMessage').textContent='這個瀏覽器目前無法儲存測試角色。';return;}
+ $('readingOpen').hidden=false;$('profile').textContent='我的角色';$('logout').hidden=false;$('student').close();setFollow(true);
+};
+$('readingOpen').onclick=()=>{if(!readingData)return;keys.clear();$('loanStatus').textContent='';showReading();$('reading').showModal();};
+$('readingClose').onclick=()=>$('reading').close();
+$('rankSort').onchange=showReading;
+$('accessory').onchange=()=>{
+ const chosen=Number($('accessory').value);if(!levels[chosen]||levels[chosen].at>readingData.books.length)return;
+ const prior=readingData.gear;readingData.gear=chosen;
+ try{saveReading();}catch{readingData.gear=prior;$('loanStatus').textContent='暫時無法儲存配件。';showReading();}
+};
+$('sampleLoan').onclick=()=>{
+ const count=readingData.books.length,[title,category]=shelfSamples[count%shelfSamples.length];
+ const book={title:title+' · 第 '+(Math.floor(count/shelfSamples.length)+1)+' 冊',category,month:monthKey()};
+ readingData.loans.push(book);
+ try{saveReading();}catch{readingData.loans.pop();$('loanStatus').textContent='暫時無法儲存借閱。';return;}
+ readingData.books.push(book);showReading();
+ $('loanStatus').textContent='已加入《'+book.title+'》。'+(growth(count)!==growth(count+1)?'升級為「'+growth(count+1).name+'」！':'');
+};
+$('camera').onclick=()=>{pitch=follow?(pitch>.45?walkPitch:.63):(pitch>.57?.44:defaultPitch);};
+$('close').onclick=close;$('action').onclick=openInteraction;
+plan.hidden=false;plan.style.visibility="hidden";
+ try{build();}finally{plan.hidden=true;plan.style.visibility="";}
+ owl.hit=item('迎賓貓頭鷹',owl.x-14,owl.y-12,28,24,false,'歡迎來到石碇高中圖書館！從大門往右走，可到櫃檯、新書區和套書區。');
+buildOwlRoute();buildLookPicker();setFollow(false);
+for(const button of document.querySelectorAll('[data-help]'))button.onclick=()=>{$('serviceMessage').textContent=serviceText[button.dataset.help];};
+new ResizeObserver(resize).observe(canvas);resize();requestAnimationFrame(render);
+</script></body></html>
